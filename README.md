@@ -1,4 +1,4 @@
-# pcOfflineBackup
+# PcOfflineBackup
 This script allows to make an backup (and a restore script) of the most PCs or laptops, after booting from a live linux system, like the System Rescue CD.
 
 The scripts are using the partclone software and other linux tools to analyse the partition table, backup partitions and write an restore script.
