@@ -21,7 +21,8 @@ BACKFILEDIR='./backup_files'
 NumSavBlocksDISK=10000
 
 # directory of the partclone applications (if the string empty, use the local applications)
-partclonePath="./partclone-bin/"
+# partclonePath="./partclone-bin/"
+partclonePath=""
 
 # the name and part of the restore script
 restoreFile='./restore.sh'
@@ -39,7 +40,8 @@ DISC='/dev/sda'
 #
 
 # check if partclone is installed
-if [ ! -e ${partclonePath}/partclone.restore ]
+if [ -n ${partclonePath} ]; then partclonePath=`dirname $(which partclone.restore)`'/'; fi
+if [ ! -e ${partclonePath}partclone.restore ]
 then
 	echo "ERROR: UNABLE TO FIND the PARTCLONE (https://partclone.org/) tools in the directory '${partclonePath}'."
 	echo "       Install the (static compiled) partclone tools to '${partclonePath}' OR update the path to the tools in this backup script."
