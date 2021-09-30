@@ -1,5 +1,11 @@
 #!/bin/bash
 #
+# A simple script to make a backup of a disk.
+# Please start it from a linux live system. It needs the PARTCLONE software to backup and restore files.
+# Please note, this script can't work correctly in some cases.
+#
+# ###
+#
 # Copyright (C) 2020 Thomas Mueller <developer@mueller-dresden.de>
 #
 # This code is free software. You can use, redistribute and/or
@@ -20,7 +26,7 @@ BACKFILEDIR='./backup_files'
 # number of the first blocks of the disk to save, by using MBR (the first blocks can contain important data for the boot loader)
 NumSavBlocksDISK=10000
 
-# directory of the partclone applications (if the string empty, use the local applications)
+# directory of the partclone applications, with '/' on the end (if the string empty, use the local applications)
 # partclonePath="./partclone-bin/"
 partclonePath=""
 
@@ -41,7 +47,7 @@ DISC='/dev/sda'
 
 # check if partclone is installed
 if [ -n ${partclonePath} ]; then partclonePath=`dirname $(which partclone.restore)`'/'; fi
-if [ ! -e ${partclonePath}partclone.restore ]
+if [ ! -e ${partclonePath}/partclone.restore ]
 then
 	echo "ERROR: UNABLE TO FIND the PARTCLONE (https://partclone.org/) tools in the directory '${partclonePath}'."
 	echo "       Install the (static compiled) partclone tools to '${partclonePath}' OR update the path to the tools in this backup script."
@@ -274,9 +280,9 @@ do
 
 	# split all lines in number and type of partition
 	PartNumber=`echo $i | awk -F ':' '{ print $1 }'`
-	PartNumber=`if [ -e "${DISC}${PartNumber}" ]; then echo "$PartNumber"; else ls -1 ${DISC}?${PartNumber} | sed "s|${DISC}||g"; fi`   # a fix for NVME discs
+	PartNumber=`if [ -e "${DISC}${PartNumber}" ]; then echo "$PartNumber"; else echo "p${PartNumber}"; fi`   # a fix for NVME discs
 	PartType=`echo $i | awk -F ':' '{ print $2 }'`
-   BackupFileName=`echo backup$DISC | sed 's/\//_/g'`
+	BackupFileName=`echo backup$DISC | sed 's/\//_/g'`
 
 	# if the partition type is EXT[2|3|4]
 	if [[ -n `echo $PartType | grep 'ext2\|ext3\|ext4'` ]]
@@ -342,7 +348,7 @@ do
    fi
 
 	# if the partition type is could not be found
-	echo "Could not sure understand the type of the partition $DISC$PartNumber . Backup this partition by using 'partclone.dd', later."
+	echo "Could not sure understand the type of the partition $DISC$PartNumber . Backup this partition by using 'dd', later."
 	echo "dd if=$DISC$PartNumber bs=10M | pv $COMPRESSCMD $SPLITCMD $BACKFILEDIR/$BackupFileName$PartNumber.dd$SUFFIX" >> $BACKFILEDIR/save_command.sh
    echo "   cat $BACKFILEDIR/$BackupFileName$PartNumber.dd$SUFFIX"'*'" | pigz -d | pv | dd of=$DISC$PartNumber bs=10M" >> $restoreFile
 
